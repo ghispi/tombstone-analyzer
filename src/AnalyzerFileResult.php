@@ -37,6 +37,11 @@ class AnalyzerFileResult implements ResultAggregateInterface
         return $this->file;
     }
 
+    public function containsTombstonesInSourceCode(): bool
+    {
+        return $this->getDeadCount() || $this->getUndeadCount();
+    }
+
     public function addDead(Tombstone $tombstone): void
     {
         $this->dead[] = $tombstone;

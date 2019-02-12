@@ -38,7 +38,7 @@ class DirectoryRenderer
 
     public function __construct(string $reportDir, string $rootDir)
     {
-        $this->reportDir = $reportDir;
+        $this->reportDir = rtrim($reportDir, '/\\'); // Remove tailing slashes
         $this->rootDir = $rootDir;
         $this->directoryTemplate = TemplateFactory::getTemplate('directory.html');
         $this->directoryItemTemplate = TemplateFactory::getTemplate('directory_item.html');
@@ -53,12 +53,15 @@ class DirectoryRenderer
             $relativePath = PathNormalizer::makeRelativeTo($fileResult->getFile(), $this->rootDir);
             $tree->addFileResult($relativePath, $fileResult);
         }
-
         $this->renderDirectoryRecursively($tree);
     }
 
     private function renderDirectoryRecursively(ResultDirectory $directory): void
     {
+        if (!$directory->containsTombstonesInSourceCode()) {
+            return; // Don't render if directory doesn't contain any remaining tombstones
+        }
+
         $this->renderDirectory($directory);
         foreach ($directory->getDirectories() as $subDir) {
             $this->renderDirectoryRecursively($subDir);
@@ -73,14 +76,14 @@ class DirectoryRenderer
         foreach ($directory->getDirectories() as $subDir) {
             $name = $subDir->getName();
             $link = './'.$subDir->getName().'/index.html';
-            if ($subDir->getDeadCount() || $subDir->getUndeadCount()) {
+            if ($subDir->containsTombstonesInSourceCode()) {
                 $filesList .= $this->renderDirectoryItem($name, $link, $subDir, $pathToRoot);
             }
         }
         foreach ($directory->getFiles() as $fileResult) {
             $name = basename($fileResult->getFile());
             $link = './'.$name.'.html';
-            if ($fileResult->getDeadCount() || $fileResult->getUndeadCount()) {
+            if ($fileResult->containsTombstonesInSourceCode()) {
                 $filesList .= $this->renderDirectoryItem($name, $link, $fileResult, $pathToRoot);
             }
         }

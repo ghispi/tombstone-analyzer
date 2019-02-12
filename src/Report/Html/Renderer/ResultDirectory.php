@@ -56,6 +56,11 @@ class ResultDirectory implements ResultAggregateInterface
         return implode('/', $this->path);
     }
 
+    public function containsTombstonesInSourceCode(): bool
+    {
+        return $this->getUndeadCount() || $this->getUndeadCount();
+    }
+
     public function getDeadCount(): int
     {
         $count = 0;

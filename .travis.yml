@@ -14,4 +14,4 @@ install:
 
 script:
   - mkdir -p build/logs
-  - ./bin/phpunit
+  - ./bin/phpunit --filter=CommandTest
